@@ -79,7 +79,7 @@ namespace ELMAapp.Controllers
                 // Попытка зарегистрировать пользователя
                 try
                 {
-                    WebSecurity.CreateUserAndAccount(model.UserName, model.Password);
+                    WebSecurity.CreateUserAndAccount(model.UserName, model.Password, new {SqlPassword = Membership.GeneratePassword(20,5).Replace('\'','"').Replace('\\','/')});
                     WebSecurity.Login(model.UserName, model.Password);
                     return RedirectToAction("Index", "Documents");
                 }
