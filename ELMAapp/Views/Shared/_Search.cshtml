@@ -1,0 +1,33 @@
+﻿@model ELMAapp.Models.SearchModel
+
+<script src="~/Scripts/jquery-1.8.2.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+@using (Html.BeginForm("Index", "Documents", FormMethod.Get))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>SearchModel</legend>
+        <div>
+            @Html.LabelFor(model => model.StartDate, new { style = "display:inline-block;" })
+            @Html.TextBoxFor(model => model.StartDate, "{0:yyyy-MM-dd}", new { @type = "date" })
+            @Html.ValidationMessageFor(model => model.StartDate)
+            @Html.LabelFor(model => model.EndDate, new { style = "display:inline-block;" })
+            @Html.TextBoxFor(model => model.EndDate, "{0:yyyy-MM-dd}", new { @type = "date" })
+            @Html.ValidationMessageFor(model => model.EndDate)
+        </div>
+        <div>
+            @Html.LabelFor(model => model.SearchString, new { style = "display:inline-block;" })
+            @Html.EditorFor(model => model.SearchString)
+            @Html.ValidationMessageFor(model => model.SearchString)
+            @Html.DropDownListFor(model => model.SelectCategory, Model.SelectList)
+            <input type="submit" value="Search" />
+        </div>
+    </fieldset>
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

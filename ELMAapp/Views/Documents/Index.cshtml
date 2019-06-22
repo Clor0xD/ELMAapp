@@ -1,0 +1,77 @@
+﻿@model ELMAapp.Models.ViewModel
+
+@{
+    var reverse = (bool) ViewContext.RouteData.Values["reverse"];
+    var dirSort = reverse ? "▼" : "▲";
+    const string stub = "♦";
+    var sortBy = ViewContext.RouteData.Values["sortBy"].ToString();
+}
+
+@helper sortLink(string linkText, string dirSort, string stub, string sortBy, bool reverse)
+{
+    var currentSort = linkText;
+    if (linkText == sortBy)
+    {
+        linkText += dirSort;
+    }
+    else
+    {
+        linkText += stub;
+    }
+    @Html.ActionLink(linkText, ViewContext.RouteData.Values["action"].ToString(),
+        new {sortBy = currentSort, reverse = !reverse, prevSort = sortBy})
+}
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+
+<table class="tableGrid">
+    <tr>
+        <th>
+            @sortLink(@Html.DisplayNameFor(model => model.ViewDocs.First().Document.Name).ToString(), dirSort, stub, sortBy, reverse)
+        </th>
+        <th>
+            @sortLink(@Html.DisplayNameFor(model => model.ViewDocs.First().Document.Date).ToString(), dirSort, stub, sortBy, reverse)
+        </th>
+        <th>
+            @sortLink(@Html.DisplayNameFor(model => model.ViewDocs.First().Document.Author).ToString(), dirSort, stub, sortBy, reverse)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ViewDocs.First().Document.BinaryFile)
+        </th>
+        <th>
+            operations
+        </th>
+    </tr>
+    @foreach (var item in Model.ViewDocs)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Document.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Date)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Document.Author)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BinaryFileLimit)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new {id = item.Document.ID}) |
+                @Html.ActionLink("Details", "Details", new {id = item.Document.ID}) |
+                @Html.ActionLink("Delete", "Delete", new {id = item.Document.ID}) |
+                @Html.ActionLink(" ", "Download", new {id = item.Document.ID}, new
+                {
+                    style = "background: url('" + Url.Content("~/Images/download.png") + "') no-repeat center right; display:inline-block; height:32px; width:32px;"
+                })
+            </td>
+        </tr>
+    }
+</table>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
