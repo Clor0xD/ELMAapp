@@ -206,6 +206,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Data\AppELMA.mdf" />
+    <Content Include="App_Data\AppELMA_log.ldf">
+      <DependentUpon>AppELMA.mdf</DependentUpon>
+    </Content>
+    <Content Include="App_Data\aspnet-ELMAapp-20190614132607.mdf" />
+    <Content Include="App_Data\aspnet-ELMAapp-20190614132607_log.ldf">
+      <DependentUpon>aspnet-ELMAapp-20190614132607.mdf</DependentUpon>
+    </Content>
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
@@ -328,7 +336,6 @@
     <Content Include="Views\Shared\_Search.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\" />
     <Folder Include="Files\" />
   </ItemGroup>
   <ItemGroup>
