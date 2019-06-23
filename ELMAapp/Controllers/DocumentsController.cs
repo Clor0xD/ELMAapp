@@ -15,6 +15,11 @@ namespace ELMAapp.Controllers
 
         public ActionResult Index(SearchModel search, bool reverse = false, string sortBy = "Name", string prevSort = "Name")
         {
+            if (db == null)
+            {
+                ViewBag.Error = "произошла ошибка аутентификации";
+                return View("Error");
+            }
             if (sortBy != prevSort) reverse = false;
             ControllerContext.RouteData.Values.Add("reverse", reverse);
             ControllerContext.RouteData.Values.Add("sortBy", sortBy);
@@ -27,6 +32,11 @@ namespace ELMAapp.Controllers
 
         public ActionResult Details(int id = 0)
         {
+            if (db == null)
+            {
+                ViewBag.Error = "произошла ошибка аутентификации";
+                return View("Error");
+            }
             Document document = db.Documents.Find(id);
             if (document == null)
             {
@@ -41,6 +51,11 @@ namespace ELMAapp.Controllers
 
         public ActionResult Create()
         {
+            if (db == null)
+            {
+                ViewBag.Error = "произошла ошибка аутентификации";
+                return View("Error");
+            }
             return View();
         }
 
@@ -51,6 +66,11 @@ namespace ELMAapp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(CreateDocModel createDocModel)
         {
+            if (db == null)
+            {
+                ViewBag.Error = "произошла ошибка аутентификации";
+                return View("Error");
+            }
             if (ModelState.IsValid)
             {
                 var fileName = Path.GetFileName(createDocModel.BinaryFile.FileName);
@@ -71,6 +91,11 @@ namespace ELMAapp.Controllers
 
         public ActionResult Edit(int id = 0)
         {
+            if (db == null)
+            {
+                ViewBag.Error = "произошла ошибка аутентификации";
+                return View("Error");
+            }
             Document document = db.Documents.Find(id);
             if (document == null)
             {
@@ -87,6 +112,11 @@ namespace ELMAapp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(Document document)
         {
+            if (db == null)
+            {
+                ViewBag.Error = "произошла ошибка аутентификации";
+                return View("Error");
+            }
             if (ModelState.IsValid)
             {
                 db.Entry(document).State = EntityState.Modified;
@@ -102,6 +132,11 @@ namespace ELMAapp.Controllers
 
         public ActionResult Delete(int id = 0)
         {
+            if (db == null)
+            {
+                ViewBag.Error = "произошла ошибка аутентификации";
+                return View("Error");
+            }
             Document document = db.Documents.Find(id);
             if (document == null)
             {
@@ -118,6 +153,11 @@ namespace ELMAapp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
+            if (db == null)
+            {
+                ViewBag.Error = "произошла ошибка аутентификации";
+                return View("Error");
+            }
             Document document = db.Documents.Find(id);
             Debug.Assert(document != null, nameof(document) + " != null");
             db.Documents.Remove(document);
@@ -127,6 +167,11 @@ namespace ELMAapp.Controllers
 
         public ActionResult Download(int id = 0)
         {
+            if (db == null)
+            {
+                ViewBag.Error = "произошла ошибка аутентификации";
+                return View("Error");
+            }
             var document = db.Documents.Find(id);
             if (document == null)
             {
