@@ -9,7 +9,7 @@ namespace ELMAapp.Controllers
 {
     public class DocumentsController : Controller
     {
-        //private AppDBContext db = CloudContext.DB //приведет к зависанию приложения если Documents контроллер по умолчанию, вот такой баг. Я не нашел как инициализировать это так чтоб не зависало. И да я принципиально хочу этот контроллер в пути по умолчанию.
+        private AppDBContext db = CloudContext.CreateDbContext();// пробовал иначе, но увы куча багов в библиотеках, EF4 не работает conn state и еще всякие другие вроде зависания приложения при некоторых вариантах аунтификации
         //
         // GET: /Documents/
 
@@ -19,7 +19,7 @@ namespace ELMAapp.Controllers
             ControllerContext.RouteData.Values.Add("reverse", reverse);
             ControllerContext.RouteData.Values.Add("sortBy", sortBy);
             if (search == null) search = new SearchModel();
-            return View(new ViewModel(ViewDoc.GetViewListDoc(CloudContext.DB, reverse, sortBy, search.SelectCategory, search.SearchString, search.StartDate, search.EndDate.AddDays(1)), search));
+            return View(new ViewModel(ViewDoc.GetViewListDoc(db, reverse, sortBy, search.SelectCategory, search.SearchString, search.StartDate, search.EndDate.AddDays(1)), search)); 
         }
 
         //
@@ -27,7 +27,7 @@ namespace ELMAapp.Controllers
 
         public ActionResult Details(int id = 0)
         {
-            Document document = CloudContext.DB.Documents.Find(id);
+            Document document = db.Documents.Find(id);
             if (document == null)
             {
                 return HttpNotFound();
@@ -53,19 +53,13 @@ namespace ELMAapp.Controllers
         {
             if (ModelState.IsValid)
             {
-                /*db.Documents.Add(createDocModel);
-                db.SaveChanges();*/
                 var fileName = Path.GetFileName(createDocModel.BinaryFile.FileName);
-
-                //db.Database.ExecuteSqlCommand("docInsert @p0, @p1",
-                //    parameters: new object[] {createDocModel.Name, fileName});
-
                 createDocModel.BinaryFile.SaveAs(Server.MapPath("/Files/" +
-                                                                CloudContext.DB.Database.SqlQuery<int>("docInsert @p0, @p1",
+                                                                db.Database.SqlQuery<int>("docInsert @p0, @p1",
                                                                     parameters: new object[]
                                                                         {createDocModel.Name, fileName}).Last() +
                                                                 fileName));
-                CloudContext.DB.SaveChanges();
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
@@ -77,7 +71,7 @@ namespace ELMAapp.Controllers
 
         public ActionResult Edit(int id = 0)
         {
-            Document document = CloudContext.DB.Documents.Find(id);
+            Document document = db.Documents.Find(id);
             if (document == null)
             {
                 return HttpNotFound();
@@ -95,8 +89,8 @@ namespace ELMAapp.Controllers
         {
             if (ModelState.IsValid)
             {
-                CloudContext.DB.Entry(document).State = EntityState.Modified;
-                CloudContext.DB.SaveChanges();
+                db.Entry(document).State = EntityState.Modified;
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
@@ -108,7 +102,7 @@ namespace ELMAapp.Controllers
 
         public ActionResult Delete(int id = 0)
         {
-            Document document = CloudContext.DB.Documents.Find(id);
+            Document document = db.Documents.Find(id);
             if (document == null)
             {
                 return HttpNotFound();
@@ -124,16 +118,16 @@ namespace ELMAapp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Document document = CloudContext.DB.Documents.Find(id);
+            Document document = db.Documents.Find(id);
             Debug.Assert(document != null, nameof(document) + " != null");
-            CloudContext.DB.Documents.Remove(document);
-            CloudContext.DB.SaveChanges();
+            db.Documents.Remove(document);
+            db.SaveChanges();
             return RedirectToAction("Index");
         }
 
         public ActionResult Download(int id = 0)
         {
-            var document = CloudContext.DB.Documents.Find(id);
+            var document = db.Documents.Find(id);
             if (document == null)
             {
                 return HttpNotFound();
@@ -143,6 +137,12 @@ namespace ELMAapp.Controllers
             var fileBytes = System.IO.File.ReadAllBytes(Server.MapPath("/Files" + "/" + document.ID + fileName));
 
             return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            db.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

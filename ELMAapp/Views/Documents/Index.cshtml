@@ -1,7 +1,13 @@
 ﻿@model ELMAapp.Models.ViewModel
 
 @{
-    var reverse = (bool) ViewContext.RouteData.Values["reverse"];
+    ViewBag.Title = "Index";
+}
+
+@Html.Partial("_Search", Model.Search) @*хотел вынести в шаблон но увы хелпер формы игнорирует атрибуты авторизация хвала багам*@
+
+@{
+    var reverse = (bool)ViewContext.RouteData.Values["reverse"];
     var dirSort = reverse ? "▼" : "▲";
     const string stub = "♦";
     var sortBy = ViewContext.RouteData.Values["sortBy"].ToString();
@@ -60,9 +66,9 @@
                 @Html.DisplayFor(modelItem => item.BinaryFileLimit)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new {id = item.Document.ID}) |
-                @Html.ActionLink("Details", "Details", new {id = item.Document.ID}) |
-                @Html.ActionLink("Delete", "Delete", new {id = item.Document.ID}) |
+                @Html.ActionLink("Edit", "Edit", new { id = item.Document.ID }) |
+                @Html.ActionLink("Details", "Details", new { id = item.Document.ID }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.Document.ID }) |
                 @Html.ActionLink(" ", "Download", new {id = item.Document.ID}, new
                 {
                     style = "background: url('" + Url.Content("~/Images/download.png") + "') no-repeat center right; display:inline-block; height:32px; width:32px;"

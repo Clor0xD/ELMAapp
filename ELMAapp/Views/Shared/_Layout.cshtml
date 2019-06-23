@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@using ELMAapp.Models
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta charset="utf-8"/>
-    <title>@ViewBag.Title — приложение ASP.NET MVC</title>
+    <title>@ViewBag.Title — ELMA example</title>
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
     <meta name="viewport" content="width=device-width"/>
     @Styles.Render("~/Content/css")
@@ -13,19 +14,12 @@
 <header>
     <div class="content-wrapper">
         <div class="float-left">
-            <p class="site-title">@Html.ActionLink("ваша эмблема здесь", "Index", "Home")</p>
+            <p class="site-title">@Html.ActionLink("ELMA example", "Index", "Documents")</p>
         </div>
         <div class="float-right">
             <section id="login">
                 @Html.Partial("_LoginPartial")
             </section>
-            <nav>
-                <ul id="menu">
-                    <li>@Html.ActionLink("Домашняя страница", "Index", "Home")</li>
-                    <li>@Html.ActionLink("О программе", "About", "Home")</li>
-                    <li>@Html.ActionLink("Контакт", "Contact", "Home")</li>
-                </ul>
-            </nav>
         </div>
     </div>
 </header>
@@ -38,7 +32,7 @@
 <footer>
     <div class="content-wrapper">
         <div class="float-left">
-            <p>&copy; @DateTime.Now.Year — приложение ASP.NET MVC</p>
+            <p>&copy; @DateTime.Now.Year — create by Clor#D Роман Кузнецов</p>
         </div>
     </div>
 </footer>

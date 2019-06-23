@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
-using System.Dynamic;
 using System.Linq;
 using System.Web.Security;
 using WebMatrix.WebData;
@@ -12,8 +10,12 @@ namespace ELMAapp.Models
     public static class CloudContext
     {
         private static List<string> _owners;
-        private static string database = @"C:\USERS\USER\DOCUMENTS\VISUAL STUDIO 2017\PROJECTS\ELMAAPP\ELMAAPP\APP_DATA\APPELMA.MDF";
+
+        private static string database =
+            @"C:\USERS\USER\DOCUMENTS\VISUAL STUDIO 2017\PROJECTS\ELMAAPP\ELMAAPP\APP_DATA\APPELMA.MDF";
+
         private static UsersContext _userContext;
+
         private static UsersContext UserContext
         {
             get
@@ -27,18 +29,12 @@ namespace ELMAapp.Models
             }
         }
 
-        private static AppDBContext _db;
-
-        public static AppDBContext DB
+        public static AppDBContext
+            CreateDbContext() // connection state не работает до EF6 капец баги на багах в этом MVC4 + EF4
         {
-            get
-            {
-                if (_db == null || (_db.Database.Connection.State != ConnectionState.Open))
-                    _db = CreateUserContext(Membership.GetUser().UserName,
-                        UserContext.UserProfiles.Where(up => up.UserId == WebSecurity.CurrentUserId).First()
-                            .SqlPassword);
-                return _db;
-            }
+            return CreateUserContext(Membership.GetUser().UserName,
+                UserContext.UserProfiles.Where(up => up.UserId == WebSecurity.CurrentUserId).First()
+                    .SqlPassword);
         }
 
         private static void AddDbUser(string userName, string password)

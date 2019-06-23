@@ -22,6 +22,8 @@ namespace ELMAapp.Controllers
         [AllowAnonymous]
         public ActionResult Login(string returnUrl)
         {
+            if (WebSecurity.IsAuthenticated)
+                return RedirectToAction("Index","Documents");
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
@@ -54,7 +56,7 @@ namespace ELMAapp.Controllers
         {
             WebSecurity.Logout();
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login");
         }
 
         //
