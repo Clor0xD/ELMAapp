@@ -1,40 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Web.Security;
+using Microsoft.Web.Mvc;
 using WebMatrix.WebData;
 
 namespace ELMAapp.Models
 {
-    public static class CloudContext
+    public static class CloudContext // может стоило с конфига сюда грузить но простили простейший пример файлового хранилища.
     {
         private static List<string> _owners;
 
-        private static string database =
-            @"C:\USERS\USER\DOCUMENTS\VISUAL STUDIO 2017\PROJECTS\ELMAAPP\ELMAAPP\APP_DATA\APPELMA.MDF";
+        private const string Database = @"C:\USERS\USER\DOCUMENTS\VISUAL STUDIO 2017\PROJECTS\ELMAAPP\ELMAAPP\APP_DATA\APPELMA.MDF";
 
-        private static UsersContext _userContext;
-
-        private static UsersContext UserContext
-        {
-            get
-            {
-                if (_userContext == null || (_userContext.Database.Connection.State != ConnectionState.Open))
-                {
-                    _userContext = new UsersContext();
-                }
-
-                return _userContext;
-            }
-        }
 
         public static AppDBContext
             CreateDbContext() // connection state не работает до EF6 капец баги на багах в этом MVC4 + EF4
         {
-            return CreateUserContext(Membership.GetUser().UserName,
-                UserContext.UserProfiles.Where(up => up.UserId == WebSecurity.CurrentUserId).First()
+            var uc = new UsersContext();
+            var currentUser = Membership.GetUser();
+            if (currentUser == null)
+                return null;
+            var db = CreateUserContext(currentUser.UserName,
+                // ReSharper disable once ReplaceWithSingleCallToFirst fist don't sql transform
+                uc.UserProfiles.Where(up => up.UserId == WebSecurity.CurrentUserId).First()
                     .SqlPassword);
+            uc.Dispose();
+            return db;
         }
 
         private static void AddDbUser(string userName, string password)
@@ -47,7 +39,7 @@ namespace ELMAapp.Models
             CREATE USER[{0}] FOR LOGIN[{0}]
             ALTER USER[{0}] WITH DEFAULT_SCHEMA =[db_owner]
             ALTER ROLE[db_owner] ADD MEMBER[{0}]"
-                , userName, password, database);
+                , userName, password, Database);
             var adm = new AppDBContext("AdminElma");
             adm.Database.ExecuteSqlCommand(sql);
             adm.Dispose();
@@ -58,6 +50,8 @@ namespace ELMAapp.Models
 
         private static AppDBContext CreateUserContext(string userName, string password)
         {
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+                return null;
             if (_owners == null)
                 UpdateOwners();
 

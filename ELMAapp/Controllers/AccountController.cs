@@ -20,10 +20,10 @@ namespace ELMAapp.Controllers
         // GET: /Account/Login
 
         [AllowAnonymous]
-        public ActionResult Login(string returnUrl)
-        {
+        public ActionResult Login(string returnUrl){
+            
             if (WebSecurity.IsAuthenticated)
-                return RedirectToAction("Index","Documents");
+                return RedirectToAction("Index","Documents"); // пришлось сделать редирек ибо авто редирект рпо авторизации при старте применительно в контроллеру с инициализируемыми полями приводит к зависанию приложения.
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
@@ -34,8 +34,8 @@ namespace ELMAapp.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(LoginModel model, string returnUrl)
-        {
+        public ActionResult Login(LoginModel model, string returnUrl){
+          
             if (ModelState.IsValid &&
                 WebSecurity.Login(model.UserName, model.Password, persistCookie: model.RememberMe))
             {
