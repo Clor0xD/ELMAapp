@@ -29,7 +29,7 @@ namespace ELMAapp.Controllers
 
         //
         // GET: /Documents/Details/5
-
+        /*
         public ActionResult Details(int id = 0)
         {
             if (db == null)
@@ -48,7 +48,7 @@ namespace ELMAapp.Controllers
 
         //
         // GET: /Documents/Create
-
+        */
         public ActionResult Create()
         {
             if (db == null)
@@ -88,7 +88,7 @@ namespace ELMAapp.Controllers
 
         //
         // GET: /Documents/Edit/5
-
+        /*
         public ActionResult Edit(int id = 0)
         {
             if (db == null)
@@ -164,7 +164,7 @@ namespace ELMAapp.Controllers
             db.SaveChanges();
             return RedirectToAction("Index");
         }
-
+        */
         public ActionResult Download(int id = 0)
         {
             if (db == null)

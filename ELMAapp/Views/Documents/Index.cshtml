@@ -28,9 +28,7 @@
         new {sortBy = currentSort, reverse = !reverse, prevSort = sortBy})
 }
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
+
 
 <table class="tableGrid">
     <tr>
@@ -66,9 +64,9 @@
                 @Html.DisplayFor(modelItem => item.BinaryFileLimit)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.Document.ID }) |
+                @*@Html.ActionLink("Edit", "Edit", new { id = item.Document.ID }) |
                 @Html.ActionLink("Details", "Details", new { id = item.Document.ID }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.Document.ID }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.Document.ID }) |*@
                 @Html.ActionLink(" ", "Download", new {id = item.Document.ID}, new
                 {
                     style = "background: url('" + Url.Content("~/Images/download.png") + "') no-repeat center right; display:inline-block; height:32px; width:32px;"
