@@ -7,7 +7,7 @@ using WebMatrix.WebData;
 
 namespace ELMAapp.Models
 {
-    public static class CloudContext // может стоило с конфига сюда грузить но простили простейший пример файлового хранилища.
+    public static class CloudContext // может стоило с конфига сюда грузить но просили простейший пример файлового хранилища.
     {
         private static List<string> _owners;
 
