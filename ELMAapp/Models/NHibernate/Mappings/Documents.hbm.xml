@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping
+  xmlns="urn:nhibernate-mapping-2.2"
+  assembly="ELMAapp"
+  namespace="ELMAapp"
+  auto-import="true">
+
+  <class name="ELMAapp.Models.Documents,ELMAapp">
+    <id name="ID" access="property" column="ID" type="Int32">
+      <generator class="native"></generator>
+    </id>
+    <property name="Name" access="property"
+              column="Name" type="String"></property>
+    <property name="Date" access="property"
+              column="Date" type="DateTime"></property>
+    <property name="Author" access="property"
+              column="Author" type="String"></property>
+    <property name="BinaryFile" access="property"
+              column="BinaryFile" type="String"></property>
+  </class>
+</hibernate-mapping>
+
