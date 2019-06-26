@@ -1,13 +1,13 @@
-﻿@model ELMAapp.Models.ViewModel
+﻿@model ELMAapp.Models.DocumentsAndSearchModel
 
 @{
     ViewBag.Title = "Index";
 }
 
-@Html.Partial("_Search", Model.Search) @*хотел вынести в шаблон но увы хелпер формы игнорирует атрибуты авторизация хвала багам*@
+@Html.Partial("_Search", Model.Search)
 
 @{
-    var reverse = (bool)ViewContext.RouteData.Values["reverse"];
+    var reverse = (bool) ViewContext.RouteData.Values["reverse"];
     var dirSort = reverse ? "▼" : "▲";
     const string stub = "♦";
     var sortBy = ViewContext.RouteData.Values["sortBy"].ToString();
@@ -29,17 +29,19 @@
 }
 
 
-
 <table class="tableGrid">
     <tr>
         <th>
-            @sortLink(@Html.DisplayNameFor(model => model.ViewDocs.First().Document.Name).ToString(), dirSort, stub, sortBy, reverse)
+            @sortLink(@Html.DisplayNameFor(model => model.ViewDocs.First().Document.Name)
+                .ToString(), dirSort, stub, sortBy, reverse)
         </th>
         <th>
-            @sortLink(@Html.DisplayNameFor(model => model.ViewDocs.First().Document.Date).ToString(), dirSort, stub, sortBy, reverse)
+            @sortLink(@Html.DisplayNameFor(model => model.ViewDocs.First().Document.Date)
+                .ToString(), dirSort, stub, sortBy, reverse)
         </th>
         <th>
-            @sortLink(@Html.DisplayNameFor(model => model.ViewDocs.First().Document.Author).ToString(), dirSort, stub, sortBy, reverse)
+            @sortLink(@Html.DisplayNameFor(model => model.ViewDocs.First().Document.Author)
+                .ToString(), dirSort, stub, sortBy, reverse)
         </th>
         <th>
             @Html.DisplayNameFor(model => model.ViewDocs.First().Document.BinaryFile)
@@ -64,9 +66,6 @@
                 @Html.DisplayFor(modelItem => item.BinaryFileLimit)
             </td>
             <td>
-                @*@Html.ActionLink("Edit", "Edit", new { id = item.Document.ID }) |
-                @Html.ActionLink("Details", "Details", new { id = item.Document.ID }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.Document.ID }) |*@
                 @Html.ActionLink(" ", "Download", new {id = item.Document.ID}, new
                 {
                     style = "background: url('" + Url.Content("~/Images/download.png") + "') no-repeat center right; display:inline-block; height:32px; width:32px;"

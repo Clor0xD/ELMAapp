@@ -1,11 +1,7 @@
-﻿using DotNetOpenAuth.AspNet;
-using ELMAapp.Filters;
+﻿using ELMAapp.Filters;
 using ELMAapp.Models;
 using Microsoft.Web.WebPages.OAuth;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Transactions;
 using System.Web.Mvc;
 using System.Web.Security;
 using WebMatrix.WebData;
@@ -16,20 +12,13 @@ namespace ELMAapp.Controllers
     [InitializeSimpleMembership]
     public class AccountController : Controller
     {
-        //
-        // GET: /Account/Login
-
         [AllowAnonymous]
         public ActionResult Login(string returnUrl){
             
             if (WebSecurity.IsAuthenticated)
-                return RedirectToAction("Index","Documents"); // пришлось сделать редирек ибо авто редирект рпо авторизации при старте применительно в контроллеру с инициализируемыми полями приводит к зависанию приложения.
-            ViewBag.ReturnUrl = returnUrl;
+                return RedirectToAction("Index","Documents");
             return View();
         }
-
-        //
-        // POST: /Account/Login
 
         [HttpPost]
         [AllowAnonymous]
@@ -46,9 +35,6 @@ namespace ELMAapp.Controllers
             ModelState.AddModelError("", "Имя пользователя или пароль указаны неверно.");
             return View(model);
         }
-
-        //
-        // POST: /Account/LogOff
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -68,9 +54,6 @@ namespace ELMAapp.Controllers
             return View();
         }
 
-        //
-        // POST: /Account/Register
-
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -81,7 +64,15 @@ namespace ELMAapp.Controllers
                 // Попытка зарегистрировать пользователя
                 try
                 {
-                    WebSecurity.CreateUserAndAccount(model.UserName, model.Password, new {SqlPassword = Membership.GeneratePassword(20,5).Replace('\'','"').Replace('\\','/')});
+                    WebSecurity.CreateUserAndAccount(
+                        model.UserName,
+                        model.Password,
+                        new {SqlPassword = Membership.GeneratePassword(
+                            20,5)
+                            .Replace('\'','"')
+                            .Replace('\\','/')
+                            .Replace(';',':')
+                        });
                     WebSecurity.Login(model.UserName, model.Password);
                     return RedirectToAction("Index", "Documents");
                 }
@@ -95,39 +86,6 @@ namespace ELMAapp.Controllers
             return View(model);
         }
 
-        //
-        // POST: /Account/Disassociate
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Disassociate(string provider, string providerUserId)
-        {
-            string ownerAccount = OAuthWebSecurity.GetUserName(provider, providerUserId);
-            ManageMessageId? message = null;
-
-            // Удалять связь учетной записи, только если текущий пользователь — ее владелец
-            if (ownerAccount == User.Identity.Name)
-            {
-                // Транзакция используется, чтобы помешать пользователю удалить учетные данные последнего входа
-                using (var scope = new TransactionScope(TransactionScopeOption.Required,
-                    new TransactionOptions {IsolationLevel = IsolationLevel.Serializable}))
-                {
-                    bool hasLocalAccount = OAuthWebSecurity.HasLocalAccount(WebSecurity.GetUserId(User.Identity.Name));
-                    if (hasLocalAccount || OAuthWebSecurity.GetAccountsFromUserName(User.Identity.Name).Count > 1)
-                    {
-                        OAuthWebSecurity.DeleteAccount(provider, providerUserId);
-                        scope.Complete();
-                        message = ManageMessageId.RemoveLoginSuccess;
-                    }
-                }
-            }
-
-            return RedirectToAction("Manage", new {Message = message});
-        }
-
-        //
-        // GET: /Account/Manage
-
         public ActionResult Manage(ManageMessageId? message)
         {
             ViewBag.StatusMessage =
@@ -139,9 +97,6 @@ namespace ELMAapp.Controllers
             ViewBag.ReturnUrl = Url.Action("Manage");
             return View();
         }
-
-        //
-        // POST: /Account/Manage
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -207,141 +162,6 @@ namespace ELMAapp.Controllers
             return View(model);
         }
 
-        //
-        // POST: /Account/ExternalLogin
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public ActionResult ExternalLogin(string provider, string returnUrl)
-        {
-            return new ExternalLoginResult(provider, Url.Action("ExternalLoginCallback", new {ReturnUrl = returnUrl}));
-        }
-
-        //
-        // GET: /Account/ExternalLoginCallback
-
-        [AllowAnonymous]
-        public ActionResult ExternalLoginCallback(string returnUrl)
-        {
-            AuthenticationResult result =
-                OAuthWebSecurity.VerifyAuthentication(Url.Action("ExternalLoginCallback", new {ReturnUrl = returnUrl}));
-            if (!result.IsSuccessful)
-            {
-                return RedirectToAction("ExternalLoginFailure");
-            }
-
-            if (OAuthWebSecurity.Login(result.Provider, result.ProviderUserId, createPersistentCookie: false))
-            {
-                return RedirectToLocal(returnUrl);
-            }
-
-            if (User.Identity.IsAuthenticated)
-            {
-                // Если текущий пользователь вошел в систему, добавляется новая учетная запись
-                OAuthWebSecurity.CreateOrUpdateAccount(result.Provider, result.ProviderUserId, User.Identity.Name);
-                return RedirectToLocal(returnUrl);
-            }
-            else
-            {
-                // Новый пользователь, запрашиваем желаемое имя участника
-                string loginData = OAuthWebSecurity.SerializeProviderUserId(result.Provider, result.ProviderUserId);
-                ViewBag.ProviderDisplayName = OAuthWebSecurity.GetOAuthClientData(result.Provider).DisplayName;
-                ViewBag.ReturnUrl = returnUrl;
-                return View("ExternalLoginConfirmation",
-                    new RegisterExternalLoginModel {UserName = result.UserName, ExternalLoginData = loginData});
-            }
-        }
-
-        //
-        // POST: /Account/ExternalLoginConfirmation
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public ActionResult ExternalLoginConfirmation(RegisterExternalLoginModel model, string returnUrl)
-        {
-            string provider = null;
-            string providerUserId = null;
-
-            if (User.Identity.IsAuthenticated ||
-                !OAuthWebSecurity.TryDeserializeProviderUserId(model.ExternalLoginData, out provider,
-                    out providerUserId))
-            {
-                return RedirectToAction("Manage");
-            }
-
-            if (ModelState.IsValid)
-            {
-                // Добавление нового пользователя в базу данных
-                using (UsersContext db = new UsersContext())
-                {
-                    UserProfile user =
-                        db.UserProfiles.FirstOrDefault(u => u.UserName.ToLower() == model.UserName.ToLower());
-                    // Проверка наличия пользователя в базе данных
-                    if (user == null)
-                    {
-                        // Добавление имени в таблицу профиля
-                        db.UserProfiles.Add(new UserProfile {UserName = model.UserName});
-                        db.SaveChanges();
-
-                        OAuthWebSecurity.CreateOrUpdateAccount(provider, providerUserId, model.UserName);
-                        OAuthWebSecurity.Login(provider, providerUserId, createPersistentCookie: false);
-
-                        return RedirectToLocal(returnUrl);
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("UserName",
-                            "Имя пользователя уже существует. Введите другое имя пользователя.");
-                    }
-                }
-            }
-
-            ViewBag.ProviderDisplayName = OAuthWebSecurity.GetOAuthClientData(provider).DisplayName;
-            ViewBag.ReturnUrl = returnUrl;
-            return View(model);
-        }
-
-        //
-        // GET: /Account/ExternalLoginFailure
-
-        [AllowAnonymous]
-        public ActionResult ExternalLoginFailure()
-        {
-            return View();
-        }
-
-        [AllowAnonymous]
-        [ChildActionOnly]
-        public ActionResult ExternalLoginsList(string returnUrl)
-        {
-            ViewBag.ReturnUrl = returnUrl;
-            return PartialView("_ExternalLoginsListPartial", OAuthWebSecurity.RegisteredClientData);
-        }
-
-        [ChildActionOnly]
-        public ActionResult RemoveExternalLogins()
-        {
-            ICollection<OAuthAccount> accounts = OAuthWebSecurity.GetAccountsFromUserName(User.Identity.Name);
-            List<ExternalLogin> externalLogins = new List<ExternalLogin>();
-            foreach (OAuthAccount account in accounts)
-            {
-                AuthenticationClientData clientData = OAuthWebSecurity.GetOAuthClientData(account.Provider);
-
-                externalLogins.Add(new ExternalLogin
-                {
-                    Provider = account.Provider,
-                    ProviderDisplayName = clientData.DisplayName,
-                    ProviderUserId = account.ProviderUserId,
-                });
-            }
-
-            ViewBag.ShowRemoveButton = externalLogins.Count > 1 ||
-                                       OAuthWebSecurity.HasLocalAccount(WebSecurity.GetUserId(User.Identity.Name));
-            return PartialView("_RemoveExternalLoginsPartial", externalLogins);
-        }
-
         #region Вспомогательные методы
 
         private ActionResult RedirectToLocal(string returnUrl)
@@ -361,23 +181,6 @@ namespace ELMAapp.Controllers
             ChangePasswordSuccess,
             SetPasswordSuccess,
             RemoveLoginSuccess,
-        }
-
-        internal class ExternalLoginResult : ActionResult
-        {
-            public ExternalLoginResult(string provider, string returnUrl)
-            {
-                Provider = provider;
-                ReturnUrl = returnUrl;
-            }
-
-            public string Provider { get; private set; }
-            public string ReturnUrl { get; private set; }
-
-            public override void ExecuteResult(ControllerContext context)
-            {
-                OAuthWebSecurity.RequestAuthentication(Provider, ReturnUrl);
-            }
         }
 
         private static string ErrorCodeToString(MembershipCreateStatus createStatus)
