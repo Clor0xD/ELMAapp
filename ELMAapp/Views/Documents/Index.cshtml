@@ -68,7 +68,8 @@
             <td>
                 @Html.ActionLink(" ", "Download", new {id = item.Document.ID}, new
                 {
-                    style = "background: url('" + Url.Content("~/Images/download.png") + "') no-repeat center right; display:inline-block; height:32px; width:32px;"
+                    style = "background: url('" + Url.Content("~/Images/download.png") + "')" +
+                    " no-repeat center right; display:inline-block; height:32px; width:32px;"
                 })
             </td>
         </tr>

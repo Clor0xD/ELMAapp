@@ -6,7 +6,7 @@ namespace ELMAapp.Controllers
 {
     public class DocumentsController : Controller
     {
-        public DocRepository docRepos;
+        private DocRepository docRepos;
 
         public DocumentsController()
         {
