@@ -1,54 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Web;
-using System.Web.Security;
-using ELMAapp.Models;
+﻿using ELMAapp.Models;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Security;
 using WebMatrix.WebData;
 
 namespace ELMAapp.DAL
 {
     public class DocRepository
     {
-        private static IList<string> owners;
-
-        private static ISessionFactory admSessionFactory = new Configuration().Configure(
-            HttpContext.Current.Server.MapPath(@"\Models\NHibernate\Configuration\admin.cfg.xml")).BuildSessionFactory();
-
-        private static void UpdateOwners()
-        {
-            using (var admSession = admSessionFactory.OpenSession())
-            {
-                owners = admSession.CreateSQLQuery(@"select name from master.sys.server_principals")
-                    .AddScalar("name", NHibernateUtil.String).List<string>();
-            }
-        }
-
-        private static void AddDbUser(string userName, string password)
-        {
-            var sql = string.Format(@"          
-            CREATE LOGIN[{0}] WITH PASSWORD = N'{1}', DEFAULT_DATABASE =[master], CHECK_EXPIRATION = OFF, CHECK_POLICY = OFF
-            ALTER SERVER ROLE [dbcreator] ADD MEMBER [{0}]           
-            CREATE USER[{0}] FOR LOGIN[{0}]
-            ALTER USER[{0}] WITH DEFAULT_SCHEMA =[db_owner]
-            ALTER ROLE[db_owner] ADD MEMBER[{0}]
-            select [name] from master.sys.server_principals"
-                , userName, password);
-            using (var admSession = admSessionFactory.OpenSession())
-            {
-                owners = admSession.CreateSQLQuery(sql).AddScalar("name", NHibernateUtil.String).List<string>();
-            }
-
-            if (!owners.Contains(userName))
-            {
-                throw new Exception($@"failed to create database user : {userName}");
-            }
-        }
-
         private class LoginSessionFactory
         {
             public LoginSessionFactory(ISessionFactory sessionFactory, string userName)
@@ -76,6 +41,7 @@ namespace ELMAapp.DAL
 
         private LoginSessionFactory CreateSessionFactory()
         {
+            var context = DocRepositoryContext.getInstance();
             var currentUser = Membership.GetUser();
             if (string.IsNullOrEmpty(currentUser?.UserName))
             {
@@ -94,19 +60,19 @@ namespace ELMAapp.DAL
                 throw new Exception("Authorization Error");
             }
 
-            if (owners == null)
+            if (context.Owners == null)
             {
-                UpdateOwners();
+                context.UpdateOwners();
             }
 
-            if (owners == null)
+            if (context.Owners == null)
             {
                 throw new Exception("MSSQL did not provide more than one login");
             }
 
-            if (!owners.Contains(currentUser.UserName))
+            if (!context.Owners.Contains(currentUser.UserName))
             {
-                AddDbUser(currentUser.UserName, password);
+                context.AddDbUser(currentUser.UserName, password);
             }
 
             var cgf = new Configuration();
@@ -172,6 +138,60 @@ namespace ELMAapp.DAL
             using (var session = OpenSession())
             {
                 return session.Get<Documents>(id);
+            }
+        }
+    }
+
+    public class DocRepositoryContext
+    {
+        private static DocRepositoryContext instance;
+
+        public static DocRepositoryContext getInstance()
+        {
+            if (instance != null)
+            {
+                return instance;
+            }
+
+            instance = new DocRepositoryContext();
+            return instance;
+        }
+
+        public ConcurrentDictionary<string, DocRepository> DocRepositories { get; } =
+            new ConcurrentDictionary<string, DocRepository>();
+
+        public IList<string> Owners { get; set; }
+
+        private ISessionFactory admSessionFactory = new Configuration().Configure(
+            HttpContext.Current.Server.MapPath(@"\Models\NHibernate\Configuration\admin.cfg.xml")).BuildSessionFactory();
+
+        public void UpdateOwners()
+        {
+            using (var admSession = admSessionFactory.OpenSession())
+            {
+                Owners = admSession.CreateSQLQuery(@"select name from master.sys.server_principals")
+                    .AddScalar("name", NHibernateUtil.String).List<string>();
+            }
+        }
+
+        public void AddDbUser(string userName, string password)
+        {
+            var sql = string.Format(@"          
+            CREATE LOGIN[{0}] WITH PASSWORD = N'{1}', DEFAULT_DATABASE =[master], CHECK_EXPIRATION = OFF, CHECK_POLICY = OFF
+            ALTER SERVER ROLE [dbcreator] ADD MEMBER [{0}]           
+            CREATE USER[{0}] FOR LOGIN[{0}]
+            ALTER USER[{0}] WITH DEFAULT_SCHEMA =[db_owner]
+            ALTER ROLE[db_owner] ADD MEMBER[{0}]
+            select [name] from master.sys.server_principals"
+                , userName, password);
+            using (var admSession = admSessionFactory.OpenSession())
+            {
+                Owners = admSession.CreateSQLQuery(sql).AddScalar("name", NHibernateUtil.String).List<string>();
+            }
+
+            if (!Owners.Contains(userName))
+            {
+                throw new Exception($@"failed to create database user : {userName}");
             }
         }
     }
