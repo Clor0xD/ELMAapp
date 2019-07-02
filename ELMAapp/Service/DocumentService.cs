@@ -20,7 +20,7 @@ namespace ELMAapp.Service
                 throw new Exception("Authorization Error");
             }
 
-            docRepository = DocRepositoryContext.getInstance().DocRepositories
+            docRepository = DocRepositoryContext.GetInstance().DocRepositories
                 .GetOrAdd(currentUser.UserName, (key) => new DocRepository());
         }
 
