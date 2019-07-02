@@ -32,24 +32,23 @@ namespace ELMAapp.Service
             }
         }
 
-        private static IEnumerable<DocumentsViewModel> WrapDocInModel(IEnumerable<Documents> documents)
+        private static DocumentsViewModel ToModel(Documents doc)
         {
-            return documents.Select(doc => new DocumentsViewModel()
-                {
-                    Document = doc,
-                    Date = doc.Date.ToShortDateString() + " " + doc.Date.ToShortTimeString(),
-                    BinaryFileLimit = doc.BinaryFile.Length > 30
-                        ? doc.BinaryFile.Substring(0, 30) + "..."
-                        : doc.BinaryFile
-                })
-                .ToList();
+            return new DocumentsViewModel()
+            {
+                Document = doc,
+                Date = doc.Date.ToShortDateString() + " " + doc.Date.ToShortTimeString(),
+                BinaryFileLimit = doc.BinaryFile.Length > 30
+                    ? doc.BinaryFile.Substring(0, 30) + "..."
+                    : doc.BinaryFile
+            };
         }
 
         public IEnumerable<DocumentsViewModel> SearchAndSortDocuments(bool reverse, string sortBy, SearchModel search)
         {
             var documents = docRepository.SearchAndSortDocuments(
                 reverse, sortBy, search.SelectField, search.SearchString, search.StartDate, search.EndDate.AddDays(1));
-            return WrapDocInModel(documents);
+            return documents.Select(ToModel).ToList();
         }
 
         public int CreateDocument(CreateDocModel createDocModel)
