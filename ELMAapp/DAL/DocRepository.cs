@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
@@ -161,7 +162,7 @@ namespace ELMAapp.DAL
                 id = session.CreateSQLQuery($@"exec docInsert :Name, :BinaryFile")
                     .SetString("Name", createDocModel.Name)
                     .SetString("BinaryFile", createDocModel.BinaryFile.FileName)
-                    .List<int>().First();
+                    .List<int>().Single();
                 return id;
             }
         }

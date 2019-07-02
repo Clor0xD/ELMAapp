@@ -13,18 +13,18 @@ namespace ELMAapp.Controllers
     public class AccountController : Controller
     {
         [AllowAnonymous]
-        public ActionResult Login(string returnUrl){
-            
+        public ActionResult Login(string returnUrl)
+        {
             if (WebSecurity.IsAuthenticated)
-                return RedirectToAction("Index","Documents");
+                return RedirectToAction("Index", "Documents");
             return View();
         }
 
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(LoginModel model, string returnUrl){
-          
+        public ActionResult Login(LoginModel model, string returnUrl)
+        {
             if (ModelState.IsValid &&
                 WebSecurity.Login(model.UserName, model.Password, persistCookie: model.RememberMe))
             {
@@ -41,7 +41,6 @@ namespace ELMAapp.Controllers
         public ActionResult LogOff()
         {
             WebSecurity.Logout();
-
             return RedirectToAction("Login");
         }
 
@@ -67,11 +66,13 @@ namespace ELMAapp.Controllers
                     WebSecurity.CreateUserAndAccount(
                         model.UserName,
                         model.Password,
-                        new {SqlPassword = Membership.GeneratePassword(
-                            20,5)
-                            .Replace('\'','"')
-                            .Replace('\\','/')
-                            .Replace(';',':')
+                        new
+                        {
+                            SqlPassword = Membership.GeneratePassword(
+                                    20, 5)
+                                .Replace('\'', '"')
+                                .Replace('\\', '/')
+                                .Replace(';', ':')
                         });
                     WebSecurity.Login(model.UserName, model.Password);
                     return RedirectToAction("Index", "Documents");

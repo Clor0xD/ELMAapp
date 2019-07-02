@@ -1,6 +1,7 @@
 ﻿using ELMAapp.DAL;
 using ELMAapp.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,11 +11,12 @@ namespace ELMAapp.Service
 {
     public class DocumentService
     {
-
         /// <summary>
         /// Пересоздавать фабрику сессий накладно
         /// </summary>
-        private static Dictionary<string, DocRepository> docRepositories = new Dictionary<string, DocRepository>();
+        private static ConcurrentDictionary<string, DocRepository> docRepositories =
+            new ConcurrentDictionary<string, DocRepository>();
+
         private DocRepository docRepository;
 
         public DocumentService()
@@ -25,11 +27,7 @@ namespace ELMAapp.Service
                 throw new Exception("Authorization Error");
             }
 
-            if (!docRepositories.TryGetValue(currentUser.UserName, out docRepository))
-            {
-                docRepository = new DocRepository();
-                docRepositories.Add(currentUser.UserName, docRepository);
-            }
+            docRepository = docRepositories.GetOrAdd(currentUser.UserName, (key) => new DocRepository());
         }
 
         private static DocumentsViewModel ToModel(Documents doc)

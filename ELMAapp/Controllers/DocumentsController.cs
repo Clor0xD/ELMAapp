@@ -22,7 +22,7 @@ namespace ELMAapp.Controllers
             ControllerContext.RouteData.Values.Add("sortBy", sortBy);
             if (search == null) search = new SearchModel();
             var documents = documentService.SearchAndSortDocuments(reverse, sortBy, search);
-            return View(new DocumentsAndSearchModel(documents, search));
+            return View(new DocumentsAndSearchModel(){ViewDocs = documents, Search = search });
         }
 
         public ActionResult Create()
