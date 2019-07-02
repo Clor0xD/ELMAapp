@@ -12,7 +12,7 @@ namespace ELMAapp.Models
 
         [DataType(DataType.Date), Required] public DateTime EndDate { get; set; } = DateTime.Now.AddDays(1);
 
-        public string SelectCategory { get; set; } = "";
+        public string SelectField { get; set; } = "";
 
         public readonly SelectList SelectList = new SelectList(new[] {"All Fields", "Name", "Author", "BinaryFile"});
     }

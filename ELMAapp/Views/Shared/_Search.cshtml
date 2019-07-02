@@ -24,7 +24,7 @@
                 @Html.LabelFor(model => model.SearchString, new { style = "display:inline-block;" })
                 @Html.EditorFor(model => model.SearchString)
                 @Html.ValidationMessageFor(model => model.SearchString)
-                @Html.DropDownListFor(model => model.SelectCategory, Model.SelectList)
+                @Html.DropDownListFor(model => model.SelectField, Model.SelectList)
                 <input type="submit" value="Search" />
             </div>
         </fieldset>

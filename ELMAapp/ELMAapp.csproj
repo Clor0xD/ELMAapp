@@ -202,12 +202,13 @@
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\CreateDocModel.cs" />
     <Compile Include="Models\LinqLambdaExtended.cs" />
-    <Compile Include="Models\DocRepository.cs" />
+    <Compile Include="DAL\DocRepository.cs" />
     <Compile Include="Models\Documents.cs" />
     <Compile Include="Models\DocumentsViewModel.cs" />
     <Compile Include="Models\DocumentsAndSearchModel.cs" />
     <Compile Include="Models\SearchModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\DocumentService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_Data\AppELMA.mdf" />

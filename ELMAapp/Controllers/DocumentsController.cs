@@ -1,16 +1,18 @@
 ﻿using System.IO;
 using ELMAapp.Models;
 using System.Web.Mvc;
+using ELMAapp.DAL;
+using ELMAapp.Service;
 
 namespace ELMAapp.Controllers
 {
     public class DocumentsController : Controller
     {
-        private DocRepository docRepos;
+        private DocumentService documentService;
 
         public DocumentsController()
         {
-            docRepos = new DocRepository();
+            documentService = new DocumentService();
         }
 
         public ActionResult Index(SearchModel search, bool reverse = false, string sortBy = "Name", string prevSort = "Name")
@@ -19,11 +21,8 @@ namespace ELMAapp.Controllers
             ControllerContext.RouteData.Values.Add("reverse", reverse);
             ControllerContext.RouteData.Values.Add("sortBy", sortBy);
             if (search == null) search = new SearchModel();
-            return View(new DocumentsAndSearchModel(
-                DocumentsViewModel.GetViewModel(docRepos.SearchAndSortDocuments(reverse, sortBy, search.SelectCategory,
-                    search.SearchString, search.StartDate, search.EndDate.AddDays(1))),
-                search
-            ));
+            var documents = documentService.SearchAndSortDocuments(reverse, sortBy, search);
+            return View(new DocumentsAndSearchModel(documents, search));
         }
 
         public ActionResult Create()
@@ -39,7 +38,7 @@ namespace ELMAapp.Controllers
             {
                 var fileName = Path.GetFileName(createDocModel.BinaryFile.FileName);
                 createDocModel.BinaryFile.SaveAs(
-                    Server.MapPath("/Files/" + docRepos.CreateDocument(createDocModel) + fileName));
+                    Server.MapPath("/Files/" + documentService.CreateDocument(createDocModel) + fileName));
                 return RedirectToAction("Index");
             }
 
@@ -48,7 +47,7 @@ namespace ELMAapp.Controllers
 
         public ActionResult Download(int id = 0)
         {
-            var document = docRepos.GetDocumentByID(id);
+            var document = documentService.GetDocumentByID(id);
             if (document == null)
             {
                 return HttpNotFound();
